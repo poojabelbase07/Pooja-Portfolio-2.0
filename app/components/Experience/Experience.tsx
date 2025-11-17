@@ -1,10 +1,10 @@
 import React from 'react';
 import Section from '../Common/Section';
 import ExperienceCard from './ExperienceCard';
-import { experiences } from '../../data/portfolioData';
+import { experiences } from '@/app/data/portfolioData';
 import styles from './Experience.module.css';
 
-const Experience = () => {
+export default function Experience() {
   return (
     <Section id="experience" title="Experience">
       <div className={styles.timeline}>
@@ -18,6 +18,4 @@ const Experience = () => {
       </div>
     </Section>
   );
-};
-
-export default Experience;
+}
