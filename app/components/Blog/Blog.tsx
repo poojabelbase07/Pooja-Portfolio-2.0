@@ -1,15 +1,13 @@
 import React from 'react';
-import { BookOpen } from 'lucide-react';
 import Section from '../Common/Section';
 import BlogCard from './BlogCard';
-import { blogPosts } from '../../data/portfolioData';
+import { blogPosts } from '@/app/data/portfolioData';
 import styles from './Blog.module.css';
-import { BlogPost } from '@/app/types'
-const Blog = () => {
+
+export default function Blog() {
   return (
     <Section 
       id="blog" 
-      icon={<BookOpen size={24} />} 
       title="Blog Posts"
       subtitle="Thoughts on technology, problem-solving, and building communities."
     >
@@ -20,6 +18,4 @@ const Blog = () => {
       </div>
     </Section>
   );
-};
-
-export default Blog;
+}
