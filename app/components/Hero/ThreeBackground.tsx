@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface ThreeBackgroundProps {
@@ -14,9 +14,11 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const animationIdRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    // Check if we're in browser
+    if (typeof window === 'undefined' || !containerRef.current) return;
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -29,38 +31,48 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.z = 3;
     cameraRef.current = camera;
 
-    // Renderer setup
+    // Renderer setup with transparent background
     const renderer = new THREE.WebGLRenderer({ 
       alpha: true, 
-      antialias: true 
+      antialias: true,
+      powerPreference: 'high-performance'
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0); // Fully transparent
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Create particles
-    const particlesCount = 3000;
+    // Create MORE visible particles with better distribution
+    const particlesCount = 2000;
     const positions = new Float32Array(particlesCount * 3);
     
     for (let i = 0; i < particlesCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 10;
-      positions[i + 1] = (Math.random() - 0.5) * 10;
-      positions[i + 2] = (Math.random() - 0.5) * 10;
+      // Better spread distribution
+      const radius = Math.random() * 5 + 2;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      
+      positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i + 2] = radius * Math.cos(phi);
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
+    // Better particle material - more visible
     const material = new THREE.PointsMaterial({
-      color: 0x3b82f6,
-      size: 0.02,
+      color: 0x60a5fa, // Brighter blue
+      size: 0.05, // Bigger particles
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+      depthWrite: false
     });
 
     const particles = new THREE.Points(geometry, material);
@@ -86,17 +98,17 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
     window.addEventListener('resize', handleResize);
 
     // Animation loop
-    let animationId: number;
     const animate = () => {
-      animationId = requestAnimationFrame(animate);
+      animationIdRef.current = requestAnimationFrame(animate);
 
       if (particlesRef.current) {
-        particlesRef.current.rotation.y += 0.001;
-        particlesRef.current.rotation.x += 0.0005;
+        // Continuous rotation
+        particlesRef.current.rotation.y += 0.0015;
+        particlesRef.current.rotation.x += 0.0008;
 
-        // Mouse interaction
-        const targetRotationX = mouseRef.current.y * 0.3;
-        const targetRotationY = mouseRef.current.x * 0.3;
+        // Smooth mouse interaction
+        const targetRotationX = mouseRef.current.y * 0.5;
+        const targetRotationY = mouseRef.current.x * 0.5;
         
         particlesRef.current.rotation.x += (targetRotationX - particlesRef.current.rotation.x) * 0.05;
         particlesRef.current.rotation.y += (targetRotationY - particlesRef.current.rotation.y) * 0.05;
@@ -111,12 +123,18 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
 
     // Cleanup
     return () => {
-      cancelAnimationFrame(animationId);
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+      }
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       
-      if (containerRef.current && rendererRef.current) {
-        containerRef.current.removeChild(rendererRef.current.domElement);
+      if (containerRef.current && rendererRef.current && rendererRef.current.domElement.parentNode) {
+        try {
+          containerRef.current.removeChild(rendererRef.current.domElement);
+        } catch (e) {
+          // Element already removed
+        }
       }
       
       geometry.dispose();
@@ -125,15 +143,27 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
     };
   }, []);
 
-  // Update particle size based on hover
+  // Update particle size based on hover - with smooth transition
   useEffect(() => {
     if (particlesRef.current) {
       const material = particlesRef.current.material as THREE.PointsMaterial;
-      const targetSize = isHovering ? 0.05 : 0.02;
-      const targetOpacity = isHovering ? 0.9 : 0.6;
+      const targetSize = isHovering ? 0.12 : 0.05; // Much bigger on hover
+      const targetOpacity = isHovering ? 1.0 : 0.8;
       
-      material.size = targetSize;
-      material.opacity = targetOpacity;
+      // Smooth transition
+      const animate = () => {
+        const currentSize = material.size;
+        const currentOpacity = material.opacity;
+        
+        material.size += (targetSize - currentSize) * 0.1;
+        material.opacity += (targetOpacity - currentOpacity) * 0.1;
+        
+        if (Math.abs(targetSize - currentSize) > 0.001) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      animate();
     }
   }, [isHovering]);
 
@@ -147,7 +177,8 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
         width: '100%',
         height: '100%',
         zIndex: 0,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        background: 'transparent'
       }}
     />
   );
