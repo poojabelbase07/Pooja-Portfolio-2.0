@@ -5,17 +5,17 @@
 }
 
 :root {
-  /* Colors - Minimal palette */
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-card: #1a1a1a;
+  /* Colors - Pure black minimalist */
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-card: #111111;
   
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
   --text-muted: #666666;
   
   --accent: #3b82f6;
-  --border: #2a2a2a;
+  --border: #1a1a1a;
   
   /* Spacing */
   --container-width: 1100px;
@@ -29,6 +29,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #000000;
 }
 
 body {
@@ -36,7 +37,7 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: var(--bg-primary);
+  background: #000000; /* Pure black - no visible margins */
   color: var(--text-secondary);
   line-height: 1.6;
   overflow-x: hidden;
@@ -48,7 +49,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
