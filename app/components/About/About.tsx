@@ -8,7 +8,7 @@ export default function About() {
       <div className={styles.content}>
         {/* Add your short 2-3 line bio here */}
         <p className={styles.text}>
-          Your short bio goes here. Keep it minimal and professional like Suhaan's portfolio.
+        Hello Pooja belbase here whats up!!
         </p>
       </div>
     </Section>

@@ -16,6 +16,7 @@ export default function ThreeBackground({ isHovering }: ThreeBackgroundProps) {
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationIdRef = useRef<number | null>(null);
 
+
   useEffect(() => {
     // Check if we're in browser
     if (typeof window === 'undefined' || !containerRef.current) return;
