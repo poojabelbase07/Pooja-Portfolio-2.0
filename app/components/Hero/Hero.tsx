@@ -1,70 +1,51 @@
-'use client';
+import Link from 'next/link';
+import { blogs } from '@/constants/blogs';
 
-import { useState, Suspense } from 'react';
-import { ExternalLink, ArrowDown } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { personalInfo } from '@/app/data/portfolioData';
-import styles from './Hero.module.css';
-
-// Dynamically import Three.js component (client-side only)
-const ThreeBackground = dynamic(() => import('./ThreeBackground'), {
-  ssr: false,
-  loading: () => null
-});
-
-export default function Hero() {
-  const [isHovering, setIsHovering] = useState(false);
-
-  const scrollToAbout = () => {
-    const aboutSection = document.getElementById('about');
-    if (aboutSection) {
-      aboutSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
+export default function Blogs() {
   return (
-    <section id="hero" className={styles.hero}>
-      {/* Three.js Background - Only on desktop */}
-      <div className={styles.threeContainer}>
-        <Suspense fallback={null}>
-          <ThreeBackground isHovering={isHovering} />
-        </Suspense>
-      </div>
+    <div
+      className="container mx-auto max-w-[1100px] scroll-m-24 py-10"
+      id="blogs"
+    >
+      <h2 className="mb-2 text-center text-4xl font-semibold">Blog Posts</h2>
+      <p className="mb-10 text-center text-textLight-400">
+        Thoughts on technology, problem-solving, and building communities.
+      </p>
 
-      <div className={styles.content}>
-        <p className={styles.greeting}>Hello there, I'm</p>
-        
-        <h1 className={styles.name}>{personalInfo.name}</h1>
-        
-        <h2 
-          className={styles.role}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
-          {personalInfo.role}
-        </h2>
-        
-        <h3 className={styles.tagline}>{personalInfo.tagline}</h3>
-        
-        <p className={styles.description}>{personalInfo.description}</p>
-        
-        <div className={styles.actions}>
-          <a
-            href={personalInfo.resumeLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.primaryBtn}
-          >
-            Check out my resume!
-            <ExternalLink size={18} />
-          </a>
-          
-          <button onClick={scrollToAbout} className={styles.secondaryBtn}>
-            Learn More
-            <ArrowDown size={18} />
-          </button>
-        </div>
+      <div className="grid gap-8 md:grid-cols-2">
+        {blogs.map(({ title, date, readTime, tags, excerpt, url }) => (
+          <div key={title} className="shadow-md rounded-md bg-bgBlack-400 p-6">
+            <h3 className="text-lg font-semibold">{title}</h3>
+
+            <div className="mb-3 mt-2 flex flex-wrap gap-4 text-xs text-textLight-400">
+              <span>{date}</span>
+              <span>{readTime}</span>
+            </div>
+
+            <div className="mb-3 flex flex-wrap gap-2">
+              {tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="rounded-md bg-accent-400 bg-opacity-30 px-2 py-1 text-xs text-accent-400"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <p className="mb-4 text-textLight-400">{excerpt}</p>
+
+            <Link
+              href={url}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-block rounded-sm border border-accent-400 px-4 py-2 text-accent-400 transition-transform duration-200 hover:scale-95"
+            >
+              Read More
+            </Link>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 }
